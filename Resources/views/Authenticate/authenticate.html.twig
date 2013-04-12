@@ -1,0 +1,78 @@
+{% extends "GBPersonaProviderBundle::layout.html.twig" %}
+
+{% block gb_persona_provider_js %}
+<script type="text/javascript" src="https://login.persona.org/authentication_api.js"></script>
+<script type="text/javascript">
+jQuery(function($) {
+    var email;
+    var ifSessionActive = function(email, callback) {
+        $.ajax({
+            type: 'POST',
+            crossDomain: true,
+            url: '{{ path('gb_persona_provider_identify') }}',
+            dataType: 'json',
+            data: { email: email },
+            success: function(data, status, xhr) {
+                if (data.success) {
+                    callback();
+                }
+            }
+        });
+    };
+
+    navigator.id.beginAuthentication(function(emailAddress) {
+        email = emailAddress;
+        ifSessionActive(email, function() {
+            navigator.id.completeAuthentication();
+        });
+        $('#email').val(email);
+    });
+
+    var onAuthentication = function() {
+        var password = $('#password').val(),
+            csrf_token = $('#csrf_token').val();
+
+        $.ajax({
+            type: 'POST',
+            url: '{{ path('gb_persona_provider_login_check') }}',
+            dataType: 'json',
+            data: { _username: email.split('@')[0];, _password: password, _csrf_token: csrf_token },
+            success: function(data, status, xhr) {
+                navigator.id.completeAuthentication();
+            },
+            error: function(data, status, xhr) {
+                navigator.id.raiseAuthenticationFailure(data.error);
+            }
+        });
+        return false;
+    };
+
+    var onCancel = function() {
+        navigator.id.cancelAuthentication();
+    };
+
+    $('#auth-form').submit(onAuthentication);
+    $('#cancel').click(onCancel);
+});
+</script>
+{% endblock gb_persona_provider_js %}
+
+{% block gb_persona_provider_content %}
+<form action="#" method="post" id="auth-form">
+    <fieldset>
+        <legend>Login</legend>
+        <input type="hidden" id="csrf_token" name="_csrf_token" value="{{ csrf_token }}" />
+
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="email" readonly="readonly" />
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="_password" required="required" />
+
+        <div class="control-group">
+            <button type="submit" class="btn btn-primary" id="submit" name="submit">Login</button>
+            <button class="btn" id="cancel" name="cancel">Cancel</button>
+        </div>
+    </fieldset>
+</form>
+{% endblock gb_persona_provider_content %}

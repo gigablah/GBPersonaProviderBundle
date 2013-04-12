@@ -1,0 +1,66 @@
+{% extends "GBPersonaProviderBundle::layout.html.twig" %}
+
+{% block gb_persona_provider_js %}
+<script type="text/javascript" src="https://login.persona.org/provisioning_api.js"></script>
+<script type="text/javascript">
+jQuery(function($) {
+    var ifSessionActive = function(email, callback) {
+        $.ajax({
+            type: 'POST',
+            crossDomain: true,
+            url: '{{ path('gb_persona_provider_identify') }}',
+            dataType: 'json',
+            data: { email: email },
+            success: function(data, status, xhr) {
+                if (data.success) {
+                    callback();
+                } else {
+                    return navigator.id.raiseProvisioningFailure('user is not authenticated as target user');
+                }
+            },
+            error: function(data, status, xhr) {
+                return navigator.id.raiseProvisioningFailure('user is not authenticated as target user');
+            }
+        });
+    };
+
+    var sign = function(email, pubkey, certDuration) {
+        console.log('email: '    + email);
+        console.log('pubkey: '); console.log(pubkey);
+        console.log('duration: ' + certDuration);
+        $.ajax({
+            type: 'POST',
+            crossDomain: true,
+            url: '{{ path('gb_persona_provider_certify') }}',
+            dataType: 'json',
+            data: { email: email, pubkey: JSON.stringify(pubkey), duration: certDuration },
+            success: function(data, status, xhr) {
+                console.log('Success!');
+                console.log(data);
+                navigator.id.registerCertificate(data.certificate);
+            },
+            error: function(data, status, xhr) {
+                return navigator.id.raiseProvisioningFailure(data.responseText);
+            }
+        });
+    };
+
+    navigator.id.beginProvisioning(function(email, certDuration) {
+        console.log('email: ' + email);
+        console.log('cert_duration: ' + certDuration);
+        var that = this;
+        ifSessionActive(email, function() {
+            navigator.id.genKeyPair(function(pubkey) {
+                if (typeof(pubkey) === 'string') {
+                    pubkey = JSON.parse(pubkey);
+                }
+                that.sign(email, pubkey, certDuration);
+            });
+        });
+    });
+});
+</script>
+{% endblock gb_persona_provider_js %}
+
+{% block gb_persona_provider_content %}
+{% endblock gb_persona_provider_content %}
