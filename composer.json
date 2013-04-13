@@ -1,7 +1,7 @@
 {
     "name": "gigablah/persona-provider-bundle",
     "description": "Symfony2 bundle that implements a Mozilla Persona Identity Provider",
-    "keywords": ["persona", "mozilla", "browserid", "identity provider"],
+    "keywords": ["persona", "browserid", "idp", "identity provider"],
     "homepage": "https://github.com/gigablah/GBPersonaProviderBundle",
     "type": "symfony-bundle",
     "license": "MIT",
@@ -15,7 +15,7 @@
         "symfony/framework-bundle": "2.2.*",
         "symfony/console": "2.2.*",
         "phpseclib/phpseclib": "dev-master",
-        "f21/jwt": "*"
+        "f21/jwt": "dev-master"
     },
     "suggest": {
         "friendsofsymfony/user-bundle": "Implements user account registration",
