@@ -61,12 +61,16 @@ class CertifyController extends Controller
             throw new \InvalidArgumentException('duration cannot be more than 86400 seconds');
         }
 
+        $pubkey = json_decode($pubkey, true);
+        if (!is_array($pubkey) || !isset($pubkey['alg'])) {
+            throw new \InvalidArgumentException('pubkey is not well-formed');
+        }
+
         $issuedAt = round(microtime(true) * 1000);
 
         $payload = array(
             'iss' => $host,
-            'exp' => $issuedAt + $duration * 1000,
-            'iat' => $issuedAt,
+            'exp' => $issuedAt + (int) $duration * 1000,
             'public-key' => $pubkey,
             'principal' => array(
                 'email' => $email
