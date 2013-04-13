@@ -62,7 +62,7 @@ class CertifyController extends Controller
         }
 
         $pubkey = json_decode($pubkey, true);
-        if (!is_array($pubkey) || !isset($pubkey['alg'])) {
+        if (!is_array($pubkey) || !isset($pubkey['algorithm'])) {
             throw new \InvalidArgumentException('pubkey is not well-formed');
         }
 
@@ -71,6 +71,7 @@ class CertifyController extends Controller
         $payload = array(
             'iss' => $host,
             'exp' => $issuedAt + (int) $duration * 1000,
+            'iat' => $issuedAt,
             'public-key' => $pubkey,
             'principal' => array(
                 'email' => $email
