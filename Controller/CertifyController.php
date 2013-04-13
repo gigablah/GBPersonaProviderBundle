@@ -5,6 +5,10 @@ namespace Gigablah\PersonaProviderBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
+if (!defined('OPENSSL_ALGO_SHA256')) {
+    define('OPENSSL_ALGO_SHA256', 'sha256');
+}
+
 /**
  * Create a signed certificate which allows the user to log in using Persona for the requested duration.
  *

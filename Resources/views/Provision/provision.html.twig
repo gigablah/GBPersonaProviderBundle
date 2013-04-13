@@ -48,13 +48,12 @@ jQuery(function($) {
     navigator.id.beginProvisioning(function(email, certDuration) {
         console.log('email: ' + email);
         console.log('cert_duration: ' + certDuration);
-        var that = this;
         ifSessionActive(email, function() {
             navigator.id.genKeyPair(function(pubkey) {
                 if (typeof(pubkey) === 'string') {
                     pubkey = JSON.parse(pubkey);
                 }
-                that.sign(email, pubkey, certDuration);
+                sign(email, pubkey, certDuration);
             });
         });
     });
