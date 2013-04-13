@@ -49,7 +49,7 @@ EOF
 
         $router = $this->getContainer()->get('router');
         $document = array(
-            'public_key' => array(
+            'public-key' => array(
                 'algorithm' => 'RS',
                 'n' => $key['n']->toString(),
                 'e' => $key['e']->toString()

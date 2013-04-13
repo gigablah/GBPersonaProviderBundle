@@ -16,5 +16,8 @@ class GBPersonaProviderExtension extends Extension
     {
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
+
+        $container->setParameter($this->getAlias().'.host', $config['host']);
+        $container->setParameter($this->getAlias().'.key_path', $config['key_path']);
     }
 }

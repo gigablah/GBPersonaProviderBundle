@@ -36,7 +36,7 @@ jQuery(function($) {
             type: 'POST',
             url: '{{ path('gb_persona_provider_login_check') }}',
             dataType: 'json',
-            data: { _username: email.split('@')[0];, _password: password, _csrf_token: csrf_token },
+            data: { _username: email.split('@')[0], _password: password, _csrf_token: csrf_token },
             success: function(data, status, xhr) {
                 navigator.id.completeAuthentication();
             },
