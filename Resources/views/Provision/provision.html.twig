@@ -25,9 +25,6 @@ jQuery(function($) {
     };
 
     var sign = function(email, pubkey, certDuration) {
-        console.log('email: '    + email);
-        console.log('pubkey: '); console.log(pubkey);
-        console.log('duration: ' + certDuration);
         $.ajax({
             type: 'POST',
             crossDomain: true,
@@ -35,8 +32,6 @@ jQuery(function($) {
             dataType: 'json',
             data: { email: email, pubkey: JSON.stringify(pubkey), duration: certDuration },
             success: function(data, status, xhr) {
-                console.log('Success!');
-                console.log(data);
                 navigator.id.registerCertificate(data.certificate);
             },
             error: function(data, status, xhr) {
@@ -46,8 +41,6 @@ jQuery(function($) {
     };
 
     navigator.id.beginProvisioning(function(email, certDuration) {
-        console.log('email: ' + email);
-        console.log('cert_duration: ' + certDuration);
         ifSessionActive(email, function() {
             navigator.id.genKeyPair(function(pubkey) {
                 if (typeof(pubkey) === 'string') {
