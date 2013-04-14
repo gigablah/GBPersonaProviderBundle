@@ -3,6 +3,7 @@
 namespace Gigablah\PersonaProviderBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -13,9 +14,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class IdentifyController extends Controller
 {
-    public function identifyAction()
+    public function identifyAction(Request $request)
     {
-        $email = $this->getRequest()->request->get('email');
+        $email = $request->request->get('email');
 
         try {
             $success = $this->isSessionActive($email);

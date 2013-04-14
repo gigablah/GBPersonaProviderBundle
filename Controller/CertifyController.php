@@ -3,6 +3,7 @@
 namespace Gigablah\PersonaProviderBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 if (!defined('OPENSSL_ALGO_SHA256')) {
@@ -16,13 +17,11 @@ if (!defined('OPENSSL_ALGO_SHA256')) {
  */
 class CertifyController extends Controller
 {
-    public function certifyAction()
+    public function certifyAction(Request $request)
     {
-        $request = $this->getRequest();
-
         $email = $request->request->get('email');
         $pubkey = $request->request->get('pubkey');
-        $duration = $request->request->get('duration');
+        $duration = $request->request->get('duration', 86400);
         $host = $this->container->getParameter('gb_persona_provider.host') ?: $request->getHost();
 
         try {
@@ -35,8 +34,12 @@ class CertifyController extends Controller
         return new JsonResponse(array('success' => true, 'certificate' => $certificate));
     }
 
-    protected function certify($email, $pubkey, $privkey, $host, $duration = 86400)
+    protected function certify($email, $pubkey, $privkey, $host, $duration)
     {
+        if (!strlen($host)) {
+            throw new \InvalidArgumentException('host argument is required and must be a string');
+        }
+
         if (!strlen($email)) {
             throw new \InvalidArgumentException('email argument is required and must be a string');
         }
@@ -49,12 +52,12 @@ class CertifyController extends Controller
             throw new \InvalidArgumentException('privkey argument is required and must be a string');
         }
 
-        if (!strlen($host)) {
-            throw new \InvalidArgumentException('host argument is required and must be a string');
-        }
-
         if (!is_numeric($duration)) {
             throw new \InvalidArgumentException('duration argument must be a number when present');
+        }
+
+        if ($duration <= 0) {
+            throw new \InvalidArgumentException('duration must be a positive integer');
         }
 
         if ($duration > 86400) {

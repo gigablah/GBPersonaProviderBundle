@@ -4,50 +4,51 @@
 <script type="text/javascript" src="https://login.persona.org/provisioning_api.js"></script>
 <script type="text/javascript">
 jQuery(function($) {
-    var ifSessionActive = function(email, callback) {
-        $.ajax({
-            type: 'POST',
-            crossDomain: true,
-            url: '{{ path('gb_persona_provider_identify') }}',
-            dataType: 'json',
-            data: { email: email },
-            success: function(data, status, xhr) {
-                if (data.success) {
-                    callback();
-                } else {
-                    return navigator.id.raiseProvisioningFailure('user is not authenticated as target user');
+    var checkSession = function(email, onSuccess, onFailure) {
+            $.ajax({
+                type: 'POST',
+                crossDomain: true,
+                url: '{{ path('gb_persona_provider_identify') }}',
+                dataType: 'json',
+                data: { email: email },
+                success: function(data, status, xhr) {
+                    if (data.success) {
+                        onSuccess();
+                    } else {
+                        onFailure();
+                    }
+                },
+                error: function(data, status, xhr) {
+                    onFailure();
                 }
-            },
-            error: function(data, status, xhr) {
-                return navigator.id.raiseProvisioningFailure('user is not authenticated as target user');
-            }
-        });
-    };
-
-    var sign = function(email, pubkey, certDuration) {
-        $.ajax({
-            type: 'POST',
-            crossDomain: true,
-            url: '{{ path('gb_persona_provider_certify') }}',
-            dataType: 'json',
-            data: { email: email, pubkey: JSON.stringify(pubkey), duration: certDuration },
-            success: function(data, status, xhr) {
-                navigator.id.registerCertificate(data.certificate);
-            },
-            error: function(data, status, xhr) {
-                return navigator.id.raiseProvisioningFailure(data.responseText);
-            }
-        });
-    };
+            });
+        },
+        sign = function(email, pubkey, certDuration) {
+            $.ajax({
+                type: 'POST',
+                crossDomain: true,
+                url: '{{ path('gb_persona_provider_certify') }}',
+                dataType: 'json',
+                data: { email: email, pubkey: JSON.stringify(pubkey), duration: certDuration },
+                success: function(data, status, xhr) {
+                    navigator.id.registerCertificate(data.certificate);
+                },
+                error: function(data, status, xhr) {
+                    navigator.id.raiseProvisioningFailure(data.responseText);
+                }
+            });
+        };
 
     navigator.id.beginProvisioning(function(email, certDuration) {
-        ifSessionActive(email, function() {
+        checkSession(email, function() {
             navigator.id.genKeyPair(function(pubkey) {
                 if (typeof(pubkey) === 'string') {
                     pubkey = JSON.parse(pubkey);
                 }
                 sign(email, pubkey, certDuration);
             });
+        }, function() {
+            navigator.id.raiseProvisioningFailure('user is not authenticated as target user');
         });
     });
 });
